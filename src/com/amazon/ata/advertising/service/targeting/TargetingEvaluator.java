@@ -4,7 +4,12 @@ import com.amazon.ata.advertising.service.model.RequestContext;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicate;
 import com.amazon.ata.advertising.service.targeting.predicate.TargetingPredicateResult;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -44,15 +49,31 @@ public class TargetingEvaluator {
 //        return allTruePredicates ? TargetingPredicateResult.TRUE :
 //                                   TargetingPredicateResult.FALSE;
 
-        boolean allTrue = targetingGroup.getTargetingPredicates()
-                .stream()
-                .allMatch(targetingPredicate -> targetingPredicate.evaluate(requestContext).isTrue());
+//        TargetingPredicateResult allTrue = targetingGroup.getTargetingPredicates()
+//                .stream()
+//                .allMatch(targetingPredicate ->
+//                        targetingPredicate.evaluate(requestContext).isTrue()) ?
+//                TargetingPredicateResult.TRUE :
+//                TargetingPredicateResult.FALSE;
 
-        return allTrue ? TargetingPredicateResult.TRUE :
-                         TargetingPredicateResult.FALSE;
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        try {
+            return executorService.submit(() ->
+                            targetingGroup.getTargetingPredicates()
+                                    .stream()
+                                    .allMatch(targetingPredicate ->
+                                            targetingPredicate.evaluate(requestContext)
+                                                    .isTrue()) ?
+                                            TargetingPredicateResult.TRUE :
+                                            TargetingPredicateResult.FALSE)
+                                    .get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
-
-
-
+        executorService.shutdown();
+        return TargetingPredicateResult.FALSE;
     }
 }

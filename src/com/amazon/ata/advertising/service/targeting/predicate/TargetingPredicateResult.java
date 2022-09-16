@@ -1,5 +1,6 @@
 package com.amazon.ata.advertising.service.targeting.predicate;
 
+
 /**
  * Possible outcomes from a targeting predicate's evaluate method. If a TRUE/FALSE value cannot be evaluated,
  * INDETERMINATE will be returned.
