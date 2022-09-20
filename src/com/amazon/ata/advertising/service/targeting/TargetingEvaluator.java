@@ -55,7 +55,6 @@ public class TargetingEvaluator {
 //                        targetingPredicate.evaluate(requestContext).isTrue()) ?
 //                TargetingPredicateResult.TRUE :
 //                TargetingPredicateResult.FALSE;
-
         ExecutorService executorService = Executors.newCachedThreadPool();
         try {
             return executorService.submit(() ->
